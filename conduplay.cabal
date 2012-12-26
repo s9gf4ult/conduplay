@@ -22,7 +22,14 @@ executable gentext
                        mersenne-random-pure64,
                        text,
                        bytestring,
-                       blaze-builder
+                       blaze-builder,
+                       vector,
+                       mwc-random-monad,
+                       mwc-random,
+                       primitive,
+                       conduit,
+                       mtl
+                       
 
 
 executable conduplay
