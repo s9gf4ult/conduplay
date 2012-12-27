@@ -18,15 +18,11 @@ executable gentext
   main-is:             gentext.hs
 
   build-depends:       base,
-                       random,
                        mersenne-random-pure64,
+                       monad-mersenne-random,
                        text,
                        bytestring,
-                       blaze-builder,
                        vector,
-                       mwc-random-monad,
-                       mwc-random,
-                       primitive,
                        conduit,
                        mtl
                        

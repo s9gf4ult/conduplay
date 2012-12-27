@@ -4,43 +4,48 @@ import Control.Monad.Trans
 
 import qualified Data.Text as T
 
-import Control.Monad.Primitive
-import System.IO
-import System.Environment
-import System.Random.MWC
-import qualified System.Random.MWC.Monad as RM
-import qualified Data.Vector.Unboxed as V
+import System.IO (stdout)
+import System.Environment (getArgs)
+  
+import Control.Monad.Mersenne.Random
+import System.Random.Mersenne.Pure64
 
 import Data.Conduit
 import qualified Data.Conduit.Binary as CB
 import qualified Data.Conduit.Text as CT
 
-smbls = V.fromList ['a'..'z']
-smlen = (V.length smbls) - 1
+import qualified Data.Vector.Unboxed as UV
 
-gensym :: (PrimMonad m) => RM.Rand m Char
-gensym = do
-  l <- RM.uniformR (0, smlen)
-  return $ smbls V.! l
+  
 
 main = do
   args <- getArgs
   case args of
     [a] -> do
-      generate 300 $= isolate (read a :: Int) $= CT.encode CT.utf8 $$ CB.sinkHandle stdout
+      generate 1000 $= isolate (read a :: Int) $= CT.encode CT.utf8 $$ CB.sinkHandle stdout
 
 
     _ -> print "bad arguments"
 
   where
     generate count = do
-      g <- lift $ create
+      g <- lift $ newPureMT
       ggen count g
 
     ggen count g = do
-      d <- lift $ RM.runRand (sequence $ replicate count gensym) g
+      let (d, gg) = runRandom (rnds count) g
       yield $ T.pack d
-      ggen count g
+      ggen count gg
+      
+
+    rnds count = do
+      ints <- sequence $ replicate count getInt
+      return $ map i2char ints
+
+    i2char i = chars UV.! (i `mod` charlen)
+
+    chars = UV.fromList ['A'..'Z']
+    charlen = UV.length chars
   
     isolate count = isolate' 0 count
     isolate' acc count | acc > count = return ()
@@ -57,6 +62,3 @@ main = do
                       else do
                         yield $ T.take (count - acc) b
                         isolate' (acc + l) count
-                      
-      
-      
