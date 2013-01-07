@@ -37,4 +37,6 @@ executable conduplay
                        mtl,
                        unordered-containers,
                        containers
+
+  ghc-options:  -rtsopts                    
                       
