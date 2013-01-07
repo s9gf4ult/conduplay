@@ -4,9 +4,9 @@ import Data.Conduit
 import Data.Conduit.Binary
 import qualified Data.Conduit.List as CL
 import Data.Conduit.Text
-import Data.Text as T
-import Data.Map as M
-import Data.Set as S
+import qualified Data.Text as T
+import qualified Data.Map.Strict as M
+import qualified Data.Set as S
 import Data.Char as C
 import Data.Monoid
 
@@ -46,7 +46,7 @@ main = do
               in do
                 yield $ mappend t $ T.take d b
                 let (res, rest) = yieldfrom (T.drop d b)
-                mapM yield res
+                mapM_ yield res
                 byN' rest count
         | otherwise = do
           a <- await
@@ -54,17 +54,18 @@ main = do
             Nothing -> return ()
             Just b -> do
               let (res, rest) = yieldfrom b
-              mapM yield res
+              mapM_ yield res
               byN' rest count
 
         where
           l = T.length t
           yieldfrom txt | T.length txt < count = ([], txt)
-                        | otherwise = (bfr:more, rest)
+                        | otherwise = (res, rest)
             where
-              (bfr, aftr) = T.splitAt count txt
-              (more, rest) = yieldfrom aftr
-        
+              res = map (\x -> T.take count $ T.drop (count * x) txt) [0..a-1]
+              rest | b == 0 = T.empty
+                   | otherwise = T.drop (count * a) txt
+              (a, b) = divMod (T.length txt) count
           
     
       collect e = do
