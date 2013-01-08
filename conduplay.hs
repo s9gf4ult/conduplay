@@ -1,3 +1,5 @@
+{-# LANGUAGE BangPatterns #-}
+
 module Main where
 
 import Data.Conduit
@@ -68,7 +70,7 @@ main = do
               (a, b) = divMod (T.length txt) count
           
     
-      collect e = do
+      collect !e = do
         mx <- await
         case mx of
           Nothing -> yield e
