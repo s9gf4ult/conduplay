@@ -7,7 +7,7 @@ import Data.Conduit.Binary
 import qualified Data.Conduit.List as CL
 import Data.Conduit.Text
 import qualified Data.Text as T
-import qualified Data.Map.Strict as M
+import qualified Data.Map as M
 import qualified Data.Set as S
 import Data.Char as C
 import Data.Monoid
@@ -33,7 +33,7 @@ main = do
       
       byN count = byN' T.empty count
 
-      byN' t count
+      byN' !t !count
         | l >= count = do
           yield $ T.take count t
           byN' (T.drop count t) count
